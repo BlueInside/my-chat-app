@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node ./bin/www",
     "server": "nodemon ./bin/www",
-    "serverStart": "DEBUG=my-chat-app:* npm run server"
+    "serverStart": "DEBUG=my-chat-app:* npm run server",
+    "test": "jest --watch"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -18,6 +19,7 @@
     "pug": "^3.0.2"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "supertest": "^6.3.4"
   }
 }
