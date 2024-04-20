@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "server": "nodemon ./bin/www",
+    "serverStart": "DEBUG=my-chat-app:* npm run server"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
