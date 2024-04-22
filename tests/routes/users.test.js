@@ -1,0 +1,119 @@
+const users = require('../../routes/users');
+const request = require('supertest');
+const express = require('express');
+
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use('/users', users);
+
+jest.mock('../../models/user', () => {
+  let users = [
+    {
+      id: 1,
+      username: 'username',
+    },
+    { id: 2, username: 'username' },
+  ];
+  return {
+    find: jest.fn().mockResolvedValue(users),
+    create: jest.fn().mockResolvedValue({
+      id: 1,
+      username: 'newUser',
+    }),
+    findById: jest
+      .fn()
+      .mockImplementation((id) =>
+        Promise.resolve(users.find((user) => user.id === parseInt(id)))
+      ),
+    findByIdAndUpdate: jest.fn().mockImplementation((id, update) => {
+      const existingUser = users.find((user) => user.id === parseInt(id));
+      if (existingUser) {
+        return Promise.resolve({
+          ...users.find((user) => user.id === parseInt(id)),
+          ...update,
+        });
+      } else {
+        return Promise.resolve(null);
+      }
+    }),
+    findByIdAndDelete: jest.fn().mockImplementation((id) => {
+      const existingUser = users.find((user) => user.id === parseInt(id));
+      if (existingUser) {
+        return Promise.resolve(users.find((user) => user.id === parseInt(id)));
+      } else return Promise.resolve(null);
+    }),
+  };
+});
+
+describe('GET /users', () => {
+  test('Should get list of all the users', async () => {
+    const response = await request(app).get('/users');
+
+    expect(response.status).toBe(200);
+    expect(response.body.users).toHaveLength(2);
+    expect(response.body.users[0]).toHaveProperty('username');
+    expect(response.body.users[1]).toHaveProperty('username');
+  });
+
+  test('Should get a user when valid ID is provided', async () => {
+    const response = await request(app)
+      .get('/users/1')
+      .expect('Content-Type', /json/);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('username', 'username');
+  });
+
+  test('Should return 404 when invalid user ID is provided', async () => {
+    const response = await request(app).get('/users/999');
+
+    expect(response.status).toBe(404);
+  });
+});
+
+describe('POST /users', () => {
+  test('Should create new user, and return it', async () => {
+    const response = await request(app)
+      .post('/users')
+      .send({ username: 'newUser', password: 'password12345' });
+
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty('username');
+  });
+});
+
+describe('PUT /users/:id', () => {
+  test('Should update existing user and return it', async () => {
+    const response = await request(app).put('/users/2').send({
+      username: 'updatedUsername',
+      password: 'password123',
+      fullName: 'karol Pulawski',
+      bio: '',
+      avatarUrl: '',
+      dateOfBirth: '1997-05-18',
+      role: 'admin',
+    });
+
+    if (response.status !== 200) console.log(response.body);
+    expect(response.status).toBe(200);
+    expect(response.body.user).toHaveProperty('username', 'updatedUsername');
+  });
+
+  test('Should throw 400 if user not found', async () => {
+    const response = await request(app).put('/users/999').send({
+      username: 'updatedUsername',
+    });
+
+    expect(response.status).toBe(400);
+  });
+});
+
+describe('DELETE /users/:id', () => {
+  test('Returns checks if route deletes user when id param is correct', async () => {
+    const response = await request(app).delete('/users/1');
+
+    expect(response.status).toBe(204);
+  });
+});
