@@ -11,7 +11,7 @@ const userSchema = new Schema(
     dateOfBirth: { type: Date },
     lastActive: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
-    roles: [{ type: String, enum: ['user', 'admin'], default: 'user' }],
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
     messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
   },
   { timestamps: true } // Adds createdAt and updatedAt fields
