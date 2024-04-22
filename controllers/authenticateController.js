@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const sign_up = asyncHandler(async (req, res, next) => {
+  // Validate here!
   const { username, password } = req.body;
 
   try {
@@ -37,6 +38,33 @@ const sign_up = asyncHandler(async (req, res, next) => {
   }
 });
 
+const login = asyncHandler(async (req, res, next) => {
+  // Validate here!
+  const { username, password } = req.body;
+  try {
+    const user = await User.findOne({ username });
+    // Checks if user was found
+    if (!user) res.status(404).json({ message: 'User not found.' });
+
+    const match = await bcrypt.compare(password, user.password);
+    // Checks if password match hashed password value.
+    if (!match) res.status(401).json({ message: `Password doesn't match.` });
+
+    // Generate token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '2h',
+    });
+
+    // Login user
+    res
+      .status(200)
+      .json({ user: { id: user._id, username: user.username }, token });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = {
   sign_up,
+  login,
 };
