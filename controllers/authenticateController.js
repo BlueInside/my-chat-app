@@ -2,10 +2,10 @@ const User = require('../models/user');
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+
 require('dotenv').config();
 
 const sign_up = asyncHandler(async (req, res, next) => {
-  // Validate here!
   const { username, password } = req.body;
 
   try {
@@ -39,7 +39,6 @@ const sign_up = asyncHandler(async (req, res, next) => {
 });
 
 const login = asyncHandler(async (req, res, next) => {
-  // Validate here!
   const { username, password } = req.body;
   try {
     const user = await User.findOne({ username });
