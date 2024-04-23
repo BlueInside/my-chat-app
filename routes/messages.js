@@ -2,6 +2,7 @@ const express = require('express');
 const messages = express.Router();
 
 const messageController = require('../controllers/messageController');
+
 // GET all messages for a user
 messages.get('/', messageController.getAllMessages);
 
