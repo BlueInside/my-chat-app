@@ -1,9 +1,10 @@
 const Message = require('../models/message');
+
 const asyncHandler = require('express-async-handler');
 
 const getAllMessages = asyncHandler(async (req, res, next) => {
   const messages = await Message.find({});
-
+  if (!messages) res.status(404).json({ message: 'Messages not found' });
   res.status(200).json({ messages: messages });
 });
 
