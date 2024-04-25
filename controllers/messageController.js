@@ -1,6 +1,10 @@
 const Message = require('../models/message');
+const User = require('../models/user');
+const Conversation = require('../models/conversation');
+
 const mongoose = require('mongoose');
 const asyncHandler = require('express-async-handler');
+const conversation = require('../models/conversation');
 
 const getAllMessages = asyncHandler(async (req, res, next) => {
   const messages = await Message.find({});
@@ -24,7 +28,50 @@ const getMessageById = asyncHandler(async (req, res, next) => {
 });
 
 const sendMessage = asyncHandler(async (req, res, next) => {
-  res.send('POST MESSAGE NOT IMPLEMENTED');
+  const { receiverId, senderId } = req.body;
+
+  const isReceiverIdValid = mongoose.Types.ObjectId.isValid(receiverId);
+  const isSenderIdValid = mongoose.Types.ObjectId.isValid(senderId);
+
+  if (!isReceiverIdValid)
+    return res.status(400).json({ message: 'Invalid receiver id' });
+
+  if (!isSenderIdValid)
+    return res.status(400).json({ message: 'Invalid sender id' });
+
+  // Create message
+  const message = await Message.create({
+    receiver: receiverId,
+    sender: senderId,
+    text: req.body.text,
+    type: req.body.type || 'text',
+  });
+
+  // Create conversation
+  const conversation = await Conversation.findOne({
+    participants: { $all: [receiverId, senderId] },
+  });
+
+  //  No conversation create new
+  if (!conversation) {
+    const newConversation = await Conversation.create({
+      lastMessage: message.id,
+      participants: [receiverId, senderId],
+      messages: [message.id],
+    });
+
+    await newConversation.save();
+  } else if (conversation) {
+    // Push message
+    conversation.messages.push(message.id);
+
+    // Change last message
+    conversation.lastMessage = message.id;
+
+    await conversation.save();
+  }
+
+  res.status(201).json({ message: 'Message sent successfully', data: message });
 });
 
 const deleteMessage = asyncHandler(async (req, res, next) => {
