@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const conversationSchema = new Schema(
   {
-    lastMessage: { type: Schema.types.ObjectId, ref: 'Message' }, // References the latest sent message
+    lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' }, // References the latest sent message
     participants: [
       { type: Schema.Types.ObjectId, ref: 'User', required: true },
     ],
