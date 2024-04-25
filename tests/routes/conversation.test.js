@@ -63,7 +63,7 @@ describe('POST /conversations', () => {
       .send({ senderId: senderId, receiverId: receiverId });
 
     expect(response.status).toBe(400);
-    expect(response.body.message).toMatch(
+    expect(response.body.errors[0].msg).toMatch(
       /Sender and receiver cannot be the same./i
     );
   });
