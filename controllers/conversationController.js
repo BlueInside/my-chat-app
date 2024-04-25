@@ -12,20 +12,7 @@ const getAllConversations = asyncHandler(async (req, res) => {
 
 const createConversation = asyncHandler(async (req, res) => {
   // USE JWT
-
   const { senderId, receiverId } = req.body;
-  //   Check if id's are correct mongoose ids
-  if (!isValid(senderId) || !isValid(receiverId)) {
-    return res
-      .status(400)
-      .json({ message: 'Either sender or receiver id is wrong.' });
-  }
-
-  if (senderId === receiverId) {
-    return res
-      .status(400)
-      .json({ message: 'Sender and receiver cannot be the same.' });
-  }
 
   try {
     const sortedParticipants = [senderId, receiverId].sort(); // Sort participants
