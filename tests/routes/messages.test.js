@@ -17,6 +17,7 @@ jest.mock('../../models/conversation', () => ({
     lastMessage: '',
     save: jest.fn().mockResolvedValue({}),
   }),
+  updateMany: jest.fn().mockResolvedValue({ message: 'success' }),
 }));
 
 // Mock messages model
@@ -31,6 +32,7 @@ jest.mock('../../models/message', () => ({
       updatedAt: new Date(),
     })
   ),
+  findByIdAndDelete: jest.fn().mockResolvedValue({ id: '2' }),
 }));
 
 describe('GET /messages', () => {
@@ -52,7 +54,7 @@ describe('GET /messages', () => {
 });
 
 describe('POST /messages', () => {
-  test('Successfully sends message', async () => {
+  test('Should send message', async () => {
     const data = {
       receiverId: new ObjectId().toString(),
       senderId: new ObjectId().toString(),
@@ -65,5 +67,16 @@ describe('POST /messages', () => {
     expect(response.body.data.text).toBe(data.text);
     expect(response.body.data.receiver).toBe(data.receiverId);
     expect(response.body.data.sender).toBe(data.senderId);
+  });
+});
+
+describe('DELETE /messages/:id', () => {
+  test('Should delete message by id', async () => {
+    const id = new ObjectId().toString();
+    const response = await request(app).delete(`/messages/${id}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toMatch(`Message ${id} successfully deleted`);
+    expect(response.body.data).toBeInstanceOf(Object);
   });
 });
