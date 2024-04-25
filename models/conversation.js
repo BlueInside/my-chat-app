@@ -12,6 +12,10 @@ const conversationSchema = new Schema(
   { timestamps: true }
 );
 
+// Make sure participants are always sorted and unique.
+conversationSchema.index({ participants: 1 }, { unique: true });
+
+//  Makes sure there's at least 2 participants in conversation
 conversationSchema.pre('save', function (next) {
   if (this.participants && this.participants.length < 2) {
     next(
@@ -21,4 +25,12 @@ conversationSchema.pre('save', function (next) {
     next();
   }
 });
+
+conversationSchema.pre('save', function (next) {
+  // Sort participants so it's always in order A B
+  if (this.participants) {
+    this.participants.sort();
+  }
+});
+
 module.exports = mongoose.model('Conversation', conversationSchema);
