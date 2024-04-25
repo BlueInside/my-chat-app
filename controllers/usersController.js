@@ -2,9 +2,18 @@ const User = require('../models/user');
 const asyncHandler = require('express-async-handler');
 // Get all users
 const getAllUsers = asyncHandler(async (req, res) => {
-  const users = await User.find({});
+  // Sanitize query !
+  const searchQuery = req.query.search;
+  if (!searchQuery) {
+    // return list of all users if no search query
+    const users = await User.find({});
+    return res.status(200).json({ users: users });
+  }
 
-  return res.status(200).json({ users: users });
+  const regex = new RegExp(searchQuery, 'i');
+  const users = await User.find({ username: { $regex: regex } });
+
+  res.status(200).json({ users: users });
 });
 
 const getUserById = asyncHandler(async (req, res) => {
