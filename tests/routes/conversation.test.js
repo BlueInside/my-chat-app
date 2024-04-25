@@ -6,6 +6,13 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 jest.mock('../../models/conversation', () => ({
   find: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
+  findById: jest.fn().mockImplementation((id) =>
+    Promise.resolve({
+      id,
+      participants: [{ id: 1 }, { id: 2 }],
+      messages: [],
+    })
+  ),
   create: jest.fn().mockImplementation((data) => {
     return Promise.resolve({
       id: data.senderId,
@@ -59,5 +66,15 @@ describe('POST /conversations', () => {
     expect(response.body.message).toMatch(
       /Sender and receiver cannot be the same./i
     );
+  });
+});
+
+describe('GET /conversations/:id', () => {
+  test('Should get conversation details', async () => {
+    let id = new ObjectId().toString();
+    const response = await request(app).get(`/conversations/${id}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.conversation.id).toMatch(id);
   });
 });
