@@ -10,4 +10,5 @@ conversation.post('/', conversationController.createConversation);
 
 // Get details of specific conversation
 conversation.get('/:id', conversationController.getConversationDetails);
-conversation;
+
+module.exports = conversation;
