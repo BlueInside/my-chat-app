@@ -3,6 +3,7 @@ const conversation = express.Router();
 const conversationController = require('../controllers/conversationController.js');
 const {
   createConversationValidation,
+  conversationDetailsValidation,
 } = require('../lib/conversationValidations.js');
 
 // Gets all user conversations
@@ -15,6 +16,10 @@ conversation.post(
   conversationController.createConversation
 );
 // Get details of specific conversation
-conversation.get('/:id', conversationController.getConversationDetails);
+conversation.get(
+  '/:id',
+  conversationDetailsValidation(),
+  conversationController.getConversationDetails
+);
 
 module.exports = conversation;
