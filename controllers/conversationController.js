@@ -41,7 +41,7 @@ const createConversation = asyncHandler(async (req, res) => {
   } catch (error) {
     if (error.code === 11000) {
       // MongoDB duplicate key error
-      res.status(409).json({ message: 'Conversation already exists' });
+      res.status(409).json({ message: 'Conversation already exists.' });
     } else {
       return next(error);
     }
@@ -50,8 +50,17 @@ const createConversation = asyncHandler(async (req, res) => {
 
 const getConversationDetails = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  if (!isValid(id)) {
+    return res.status(400).json({ message: 'Wrong conversation id.' });
+  }
 
-  res.send(`NOT IMPLEMENTED ID ${id}`);
+  const conversation = await Conversation.findById(id);
+
+  if (!conversation) {
+    return res.status(404).json({ message: 'Conversation not found.' });
+  }
+
+  res.status(200).json({ conversation });
 });
 
 module.exports = {
