@@ -28,6 +28,7 @@ const getMessageById = asyncHandler(async (req, res, next) => {
 });
 
 const sendMessage = asyncHandler(async (req, res, next) => {
+  // Validation and sanitization
   const { receiverId, senderId } = req.body;
 
   const isReceiverIdValid = mongoose.Types.ObjectId.isValid(receiverId);
