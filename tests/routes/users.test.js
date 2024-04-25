@@ -15,9 +15,18 @@ jest.mock('../../models/user', () => {
       username: 'username',
     },
     { id: 2, username: 'username' },
+    { id: 3, username: 'karol' },
   ];
   return {
-    find: jest.fn().mockResolvedValue(users),
+    find: jest.fn((query = {}) => {
+      if (query.username && query.username.$regex) {
+        const regex = new RegExp(query.username.$regex, 'i'); // Ignore capitalization
+        return Promise.resolve(
+          users.filter((user) => regex.test(user.username))
+        );
+      }
+      return Promise.resolve(users);
+    }),
     create: jest.fn().mockResolvedValue({
       id: 1,
       username: 'newUser',
@@ -52,7 +61,7 @@ describe('GET /users', () => {
     const response = await request(app).get('/users');
 
     expect(response.status).toBe(200);
-    expect(response.body.users).toHaveLength(2);
+    expect(response.body.users).toHaveLength(3);
     expect(response.body.users[0]).toHaveProperty('username');
     expect(response.body.users[1]).toHaveProperty('username');
   });
@@ -115,5 +124,17 @@ describe('DELETE /users/:id', () => {
     const response = await request(app).delete('/users/1');
 
     expect(response.status).toBe(204);
+  });
+});
+
+describe('GET /users?search=keyword', () => {
+  test('Should find user based on search query', async () => {
+    const query = 'karol';
+    const response = await request(app).get('/users').query({ search: query });
+
+    expect(response.status).toBe(200);
+    expect(response.body.users).toBeInstanceOf(Array);
+    expect(response.body.users).toHaveLength(1);
+    expect(response.body.users[0].username).toBe('karol');
   });
 });
