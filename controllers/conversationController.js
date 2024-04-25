@@ -1,6 +1,7 @@
 const Conversation = require('../models/conversation');
 const asyncHandler = require('express-async-handler');
 const isValid = require('mongoose').Types.ObjectId.isValid;
+
 const getAllConversations = asyncHandler(async (req, res) => {
   // Use jwt payload to get userId
   const userId = 2;
@@ -13,7 +14,6 @@ const createConversation = asyncHandler(async (req, res) => {
   // USE JWT
 
   const { senderId, receiverId } = req.body;
-
   //   Check if id's are correct mongoose ids
   if (!isValid(senderId) || !isValid(receiverId)) {
     return res
