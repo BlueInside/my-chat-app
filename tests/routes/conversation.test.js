@@ -6,14 +6,22 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 jest.mock('../../models/conversation', () => ({
   find: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
+  create: jest.fn().mockImplementation((data) => {
+    return Promise.resolve({
+      id: data.senderId,
+      ...data,
+      messages: [],
+      save: jest.fn().mockResolvedValue({}),
+    });
+  }),
 }));
 
 const app = express();
 
-app.use('/conversations', conversationRouter);
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use('/conversations', conversationRouter);
 
 describe('GET /conversations', () => {
   test('Should get all user specific conversations', async () => {
@@ -26,15 +34,30 @@ describe('GET /conversations', () => {
 
 describe('POST /conversations', () => {
   test('Should create new conversation between users', async () => {
-    let senderId = new ObjectId();
-    let receiverId = new ObjectId();
+    let senderId = new ObjectId().toString();
+    let receiverId = new ObjectId().toString();
 
     const response = await request(app)
       .post('/conversations')
-      .send({ participants: [senderId, receiverId] });
+      .send({ senderId: senderId, receiverId: receiverId });
 
     expect(response.status).toBe(201);
     expect(response.body.conversation).toBeInstanceOf(Object);
-    expect(response.body.messages).toBeInstanceOf(Array);
+    expect(response.body.conversation.participants).toHaveLength(2);
+    expect(response.body.conversation.messages).toBeInstanceOf(Array);
+  });
+
+  test('Should throw 400 if both ids are identical', async () => {
+    let senderId = new ObjectId().toString();
+    let receiverId = senderId;
+
+    const response = await request(app)
+      .post('/conversations')
+      .send({ senderId: senderId, receiverId: receiverId });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toMatch(
+      /Sender and receiver cannot be the same./i
+    );
   });
 });
