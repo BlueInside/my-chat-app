@@ -1,6 +1,5 @@
 const Conversation = require('../models/conversation');
 const asyncHandler = require('express-async-handler');
-const isValid = require('mongoose').Types.ObjectId.isValid;
 
 const getAllConversations = asyncHandler(async (req, res) => {
   // Use jwt payload to get userId
