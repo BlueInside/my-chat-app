@@ -75,7 +75,24 @@ const sendMessage = asyncHandler(async (req, res, next) => {
 });
 
 const deleteMessage = asyncHandler(async (req, res, next) => {
-  res.send('DELETE MESSAGE NOT IMPLEMENTED');
+  const { id } = req.params;
+  const isValidId = mongoose.Types.ObjectId.isValid(id);
+  if (!isValidId) {
+    return res.status(400).json({ message: 'Invalid id.' });
+  }
+
+  const deletedMessage = await Message.findByIdAndDelete(id);
+
+  if (!deletedMessage) {
+    return res.status(404).json({ message: 'Message not found.' });
+  }
+
+  await Conversation.updateMany({ messages: id }, { $pull: { messages: id } });
+
+  res.status(200).json({
+    message: `Message ${id} successfully deleted.`,
+    data: deletedMessage,
+  });
 });
 
 module.exports = { getAllMessages, getMessageById, sendMessage, deleteMessage };
