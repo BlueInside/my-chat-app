@@ -37,9 +37,6 @@ const createConversation = asyncHandler(async (req, res) => {
 
 const getConversationDetails = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  if (!isValid(id)) {
-    return res.status(400).json({ message: 'Wrong conversation id.' });
-  }
 
   const conversation = await Conversation.findById(id);
 
