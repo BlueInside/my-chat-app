@@ -51,11 +51,21 @@ const updateUser = asyncHandler(async (req, res, next) => {
 });
 
 const deleteUser = asyncHandler(async (req, res, next) => {
-  const deletedUser = await User.findByIdAndDelete(req.params.id);
-  if (!deletedUser) {
-    return res.status(404).json({ message: 'User not found.' });
+  // Admin can delete any account, user can delete only his own.
+  if (req.user.role === 'admin' || req.user.id === req.params.id) {
+    const deletedUser = await User.findByIdAndDelete(
+      req.user.role === 'admin' ? req.params.id : req.user.id
+    );
+    if (!deletedUser) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    return res.status(200).json({ message: 'User deleted successfully' });
+  } else {
+    return res
+      .status(403)
+      .json({ message: 'Access forbidden: Insufficient permissions.' });
   }
-  res.send(204).json({ message: 'User deleted successfully' });
 });
 
 module.exports = {
