@@ -5,13 +5,14 @@ const {
   updateUserValidationRules,
   validate,
 } = require('../lib/userValidations');
+const { authenticateToken } = require('../lib/jwt');
 const userController = require('../controllers/usersController');
 
 // GET all users
 router.get('/', userController.getAllUsers);
 
 // GET single user
-router.get('/:id', userController.getUserById);
+router.get('/:id', authenticateToken, userController.getUserById);
 
 // POST new user
 router.post(
