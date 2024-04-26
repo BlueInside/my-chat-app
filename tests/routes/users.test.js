@@ -1,12 +1,15 @@
 const users = require('../../routes/users');
 const request = require('supertest');
 const express = require('express');
+const { generateToken } = require('../../lib/jwt');
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/users', users);
+
+const mockToken = generateToken({ id: 1, username: 'karol', role: 'admin' });
 
 jest.mock('../../models/user', () => {
   let users = [
@@ -69,14 +72,24 @@ describe('GET /users', () => {
   test('Should get a user when valid ID is provided', async () => {
     const response = await request(app)
       .get('/users/1')
+      .set('Authorization', `Bearer ${mockToken}`)
       .expect('Content-Type', /json/);
 
+    console.log(response.body);
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('username', 'username');
   });
 
+  test('should return 401 if no token is provided', async () => {
+    const response = await request(app).get('/users/1');
+
+    expect(response.status).toBe(401);
+  });
+
   test('Should return 404 when invalid user ID is provided', async () => {
-    const response = await request(app).get('/users/999');
+    const response = await request(app)
+      .get('/users/999')
+      .set('Authorization', `Bearer ${mockToken}`);
 
     expect(response.status).toBe(404);
   });
