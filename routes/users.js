@@ -6,6 +6,7 @@ const {
   validate,
   getAllUsersValidation,
   getUserByIdValidation,
+  deleteUserValidation,
 } = require('../lib/userValidations');
 const { authenticateToken } = require('../lib/jwt');
 const userController = require('../controllers/usersController');
@@ -40,6 +41,11 @@ router.put(
 );
 
 // DELETE to remove existing user
-router.delete('/:id', userController.deleteUser);
+router.delete(
+  '/:id',
+  authenticateToken,
+  deleteUserValidation(),
+  userController.deleteUser
+);
 
 module.exports = router;
