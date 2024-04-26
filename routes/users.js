@@ -24,6 +24,7 @@ router.get(
 // POST new user
 router.post(
   '/',
+  authenticateToken,
   createUserValidationRules(),
   validate,
   userController.createUser
@@ -32,6 +33,7 @@ router.post(
 // PUT to edit existing user
 router.put(
   '/:id',
+  authenticateToken,
   updateUserValidationRules(),
   validate,
   userController.updateUser
