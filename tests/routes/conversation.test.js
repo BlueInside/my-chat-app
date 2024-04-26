@@ -4,15 +4,19 @@ const request = require('supertest');
 const ObjectId = require('mongoose').Types.ObjectId;
 // mock Conversation model;
 
+const Conversation = require('../../models/conversation');
 jest.mock('../../models/conversation', () => ({
   find: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
-  findById: jest.fn().mockImplementation((id) =>
-    Promise.resolve({
+  findById: jest.fn().mockImplementation((id) => ({
+    populate: jest.fn().mockResolvedValue({
       id,
-      participants: [{ id: 1 }, { id: 2 }],
-      messages: [],
-    })
-  ),
+      participants: ['user1', 'user2'],
+      messages: [
+        { _id: 'msg1', text: 'Hello!', createdAt: new Date() },
+        { _id: 'msg2', text: 'Hi there!', createdAt: new Date() },
+      ],
+    }),
+  })),
   create: jest.fn().mockImplementation((data) => {
     return Promise.resolve({
       id: data.senderId,
@@ -76,5 +80,8 @@ describe('GET /conversations/:id', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.conversation.id).toMatch(id);
+    expect(response.body.conversation.messages).toHaveLength(2);
+    expect(response.body.conversation.messages[0].text).toEqual('Hello!');
+    expect(Conversation.findById).toHaveBeenCalledWith(id);
   });
 });
