@@ -50,16 +50,26 @@ const sendMessage = asyncHandler(async (req, res, next) => {
   res.status(201).json({ message: 'Message sent successfully', data: message });
 });
 
-const deleteMessage = asyncHandler(async (req, res, next) => {
+const deleteMessage = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const userId = req.user.id;
+  const userRole = req.user.role;
 
-  // Delete message and return it
-  const deletedMessage = await Message.findByIdAndDelete(id);
+  // Get message to check ownership
+  const message = await Message.findById(id);
 
-  //  If no message was deleted
-  if (!deletedMessage) {
+  if (!message) {
     return res.status(404).json({ message: 'Message not found.' });
   }
+
+  // If user is not a sender or admin don't allow to remove message
+  if (message.sender.toString() !== userId && userRole !== 'admin') {
+    return res.status(403).json({
+      message: 'Access denied: You can only delete your own messages.',
+    });
+  }
+
+  const deletedMessage = await Message.findByIdAndDelete(id);
 
   // Delete message from conversation model
   await Conversation.updateMany({ messages: id }, { $pull: { messages: id } });
