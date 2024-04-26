@@ -2,7 +2,10 @@ const express = require('express');
 const messages = express.Router();
 
 const messageController = require('../controllers/messageController');
-const { getMessageByIdValidation } = require('../lib/messagesValidation');
+const {
+  getMessageByIdValidation,
+  createMessageValidation,
+} = require('../lib/messagesValidation');
 // GET all messages for a user
 messages.get('/', messageController.getAllMessages);
 
@@ -14,7 +17,7 @@ messages.get(
 );
 
 // Send new message with POST
-messages.post('/', messageController.sendMessage);
+messages.post('/', createMessageValidation(), messageController.sendMessage);
 
 // Delete a message
 messages.delete('/:id', messageController.deleteMessage);
