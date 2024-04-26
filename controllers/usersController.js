@@ -6,12 +6,12 @@ const getAllUsers = asyncHandler(async (req, res) => {
   const searchQuery = req.query.search;
   if (!searchQuery) {
     // return list of all users if no search query
-    const users = await User.find({});
+    const users = await User.find({}, 'username');
     return res.status(200).json({ users: users });
   }
 
   const regex = new RegExp(searchQuery, 'i');
-  const users = await User.find({ username: { $regex: regex } });
+  const users = await User.find({ username: { $regex: regex } }, 'username');
 
   res.status(200).json({ users: users });
 });
