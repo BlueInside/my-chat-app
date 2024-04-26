@@ -15,6 +15,7 @@ conversation.post(
   createConversationValidation(),
   conversationController.createConversation
 );
+
 // Get details of specific conversation
 conversation.get(
   '/:id',
