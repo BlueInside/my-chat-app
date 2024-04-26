@@ -7,8 +7,6 @@ const {
   createMessageValidation,
   deleteMessageValidation,
 } = require('../lib/messagesValidation');
-// GET all messages for a user
-messages.get('/', messageController.getAllMessages);
 
 // GET specific message by ID
 messages.get(
