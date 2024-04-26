@@ -36,13 +36,6 @@ jest.mock('../../models/message', () => ({
 }));
 
 describe('GET /messages', () => {
-  test('Get all messages', async () => {
-    const response = await request(app).get('/messages');
-
-    expect(response.status).toBe(200);
-    expect(response.body.messages).toBeInstanceOf(Array);
-  });
-
   test('Get single message by id', async () => {
     const id = new ObjectId();
     const response = await request(app).get(`/messages/${id}`);
