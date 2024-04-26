@@ -3,7 +3,7 @@ const asyncHandler = require('express-async-handler');
 
 const getAllConversations = asyncHandler(async (req, res) => {
   // Use jwt payload to get userId
-  const userId = 2;
+  const userId = req.user.id;
   const conversations = await Conversation.find({ participants: userId });
 
   res.status(200).json({ conversations: conversations });
@@ -11,7 +11,8 @@ const getAllConversations = asyncHandler(async (req, res) => {
 
 const createConversation = asyncHandler(async (req, res) => {
   // USE JWT
-  const { senderId, receiverId } = req.body;
+  const senderId = req.user.id;
+  const { receiverId } = req.body;
 
   try {
     const sortedParticipants = [senderId, receiverId].sort(); // Sort participants
@@ -44,6 +45,13 @@ const getConversationDetails = asyncHandler(async (req, res) => {
 
   if (!conversation) {
     return res.status(404).json({ message: 'Conversation not found.' });
+  }
+
+  // Verify that user is part of the conversation
+  if (!conversation.participants.includes(req.user.id)) {
+    return res
+      .status(403)
+      .json({ message: 'User not authorized to view these messages' });
   }
 
   res.status(200).json({ conversation });
