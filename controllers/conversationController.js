@@ -37,7 +37,10 @@ const createConversation = asyncHandler(async (req, res) => {
 const getConversationDetails = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const conversation = await Conversation.findById(id);
+  const conversation = await Conversation.findById(id).populate({
+    path: 'messages',
+    options: { limit: 25, sort: { createdAt: -1 } },
+  });
 
   if (!conversation) {
     return res.status(404).json({ message: 'Conversation not found.' });
