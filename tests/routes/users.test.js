@@ -110,15 +110,18 @@ describe('POST /users', () => {
 
 describe('PUT /users/:id', () => {
   test('Should update existing user and return it', async () => {
-    const response = await request(app).put('/users/2').send({
-      username: 'updatedUsername',
-      password: 'password123',
-      fullName: 'karol Pulawski',
-      bio: '',
-      avatarUrl: '',
-      dateOfBirth: '1997-05-18',
-      role: 'admin',
-    });
+    const response = await request(app)
+      .put('/users/2')
+      .set('Authorization', `Bearer ${mockToken}`)
+      .send({
+        username: 'updatedUsername',
+        password: 'password123',
+        fullName: 'karol Pulawski',
+        bio: '',
+        avatarUrl: '',
+        dateOfBirth: '1997-05-18',
+        role: 'admin',
+      });
 
     if (response.status !== 200) console.log(response.body);
     expect(response.status).toBe(200);
@@ -126,9 +129,12 @@ describe('PUT /users/:id', () => {
   });
 
   test('Should throw 400 if user not found', async () => {
-    const response = await request(app).put('/users/999').send({
-      username: 'updatedUsername',
-    });
+    const response = await request(app)
+      .put('/users/999')
+      .set('Authorization', `Bearer ${mockToken}`)
+      .send({
+        username: 'updatedUsername',
+      });
 
     expect(response.status).toBe(400);
   });
