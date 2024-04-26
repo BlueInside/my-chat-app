@@ -1,6 +1,6 @@
 const express = require('express');
 const messages = express.Router();
-
+const { authenticateToken } = require('../lib/jwt');
 const messageController = require('../controllers/messageController');
 const {
   getMessageByIdValidation,
@@ -11,6 +11,7 @@ const {
 // GET specific message by ID
 messages.get(
   '/:id',
+  authenticateToken,
   getMessageByIdValidation(),
   messageController.getMessageById
 );
@@ -21,6 +22,7 @@ messages.post('/', createMessageValidation(), messageController.sendMessage);
 // Delete a message
 messages.delete(
   '/:id',
+  authenticateToken,
   deleteMessageValidation(),
   messageController.deleteMessage
 );
