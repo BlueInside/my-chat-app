@@ -23,17 +23,8 @@ const getMessageById = asyncHandler(async (req, res, next) => {
 });
 
 const sendMessage = asyncHandler(async (req, res, next) => {
-  // Validation and sanitization
+  // and sanitization
   const { receiverId, senderId } = req.body;
-
-  const isReceiverIdValid = mongoose.Types.ObjectId.isValid(receiverId);
-  const isSenderIdValid = mongoose.Types.ObjectId.isValid(senderId);
-
-  if (!isReceiverIdValid)
-    return res.status(400).json({ message: 'Invalid receiver id' });
-
-  if (!isSenderIdValid)
-    return res.status(400).json({ message: 'Invalid sender id' });
 
   // Create message
   const message = await Message.create({
@@ -48,7 +39,7 @@ const sendMessage = asyncHandler(async (req, res, next) => {
     participants: { $all: [receiverId, senderId] },
   });
 
-  //  No conversation create new
+  //  No conversation, create new
   if (!conversation) {
     const newConversation = await Conversation.create({
       lastMessage: message.id,
