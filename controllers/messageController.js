@@ -1,10 +1,6 @@
 const Message = require('../models/message');
-const User = require('../models/user');
 const Conversation = require('../models/conversation');
-
-const mongoose = require('mongoose');
 const asyncHandler = require('express-async-handler');
-const conversation = require('../models/conversation');
 
 const getMessageById = asyncHandler(async (req, res, next) => {
   const message = await Message.findById(req.params.id);
