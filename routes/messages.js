@@ -5,6 +5,7 @@ const messageController = require('../controllers/messageController');
 const {
   getMessageByIdValidation,
   createMessageValidation,
+  deleteMessageValidation,
 } = require('../lib/messagesValidation');
 // GET all messages for a user
 messages.get('/', messageController.getAllMessages);
@@ -20,6 +21,10 @@ messages.get(
 messages.post('/', createMessageValidation(), messageController.sendMessage);
 
 // Delete a message
-messages.delete('/:id', messageController.deleteMessage);
+messages.delete(
+  '/:id',
+  deleteMessageValidation(),
+  messageController.deleteMessage
+);
 
 module.exports = messages;
