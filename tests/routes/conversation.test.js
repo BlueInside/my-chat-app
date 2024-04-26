@@ -2,8 +2,22 @@ const conversationRouter = require('../../routes/conversation');
 const express = require('express');
 const request = require('supertest');
 const ObjectId = require('mongoose').Types.ObjectId;
-// mock Conversation model;
+const { generateToken } = require('../../lib/jwt');
 
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use('/conversations', conversationRouter);
+
+const mockToken = generateToken({
+  id: '123',
+  role: 'admin',
+  username: 'karol',
+});
+
+// mock Conversation model;
 const Conversation = require('../../models/conversation');
 jest.mock('../../models/conversation', () => ({
   find: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
@@ -27,16 +41,11 @@ jest.mock('../../models/conversation', () => ({
   }),
 }));
 
-const app = express();
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-app.use('/conversations', conversationRouter);
-
 describe('GET /conversations', () => {
   test('Should get all user specific conversations', async () => {
-    const response = await request(app).get('/conversations');
+    const response = await request(app)
+      .get('/conversations')
+      .set('Authorization', `Bearer ${mockToken}`);
 
     expect(response.status).toBe(200);
     expect(response.body.conversations).toHaveLength(2);
@@ -50,6 +59,7 @@ describe('POST /conversations', () => {
 
     const response = await request(app)
       .post('/conversations')
+      .set('Authorization', `Bearer ${mockToken}`)
       .send({ senderId: senderId, receiverId: receiverId });
 
     expect(response.status).toBe(201);
@@ -64,6 +74,7 @@ describe('POST /conversations', () => {
 
     const response = await request(app)
       .post('/conversations')
+      .set('Authorization', `Bearer ${mockToken}`)
       .send({ senderId: senderId, receiverId: receiverId });
 
     expect(response.status).toBe(400);
@@ -76,7 +87,9 @@ describe('POST /conversations', () => {
 describe('GET /conversations/:id', () => {
   test('Should get conversation details', async () => {
     let id = new ObjectId().toString();
-    const response = await request(app).get(`/conversations/${id}`);
+    const response = await request(app)
+      .get(`/conversations/${id}`)
+      .set('authorization', `Bearer ${mockToken}`);
 
     expect(response.status).toBe(200);
     expect(response.body.conversation.id).toMatch(id);
