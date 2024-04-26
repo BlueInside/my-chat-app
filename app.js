@@ -22,6 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/messages', messagesRouter);
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
@@ -29,13 +30,23 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  console.error(err);
 
-  // render the error page
+  // Provide errors only in development
+  const errorDetails =
+    req.app.get('env') === 'development'
+      ? {
+          message: err.message,
+          error: err,
+        }
+      : {};
+
   res.status(err.status || 500);
-  res.render('error');
+  // Return JSON
+  res.json({
+    message: err.message,
+    ...errorDetails,
+  });
 });
 
 module.exports = app;
