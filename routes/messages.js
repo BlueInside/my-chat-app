@@ -17,7 +17,12 @@ messages.get(
 );
 
 // Send new message with POST
-messages.post('/', createMessageValidation(), messageController.sendMessage);
+messages.post(
+  '/',
+  createMessageValidation(),
+  authenticateToken,
+  messageController.sendMessage
+);
 
 // Delete a message
 messages.delete(
