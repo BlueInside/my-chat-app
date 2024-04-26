@@ -5,10 +5,10 @@ const {
   validateLogin,
   validate,
 } = require('../lib/validations');
-const { sign_up, login } = require('../controllers/authenticateController');
+const { signUp, login } = require('../controllers/authenticateController');
 
 // POST sign-up
-authenticate.post('/sign-up', validateSignup, validate, sign_up);
+authenticate.post('/sign-up', validateSignup, validate, signUp);
 
 // POST login
 authenticate.post('/login', validateLogin, validate, login);
