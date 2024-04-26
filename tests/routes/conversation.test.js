@@ -3,7 +3,6 @@ const express = require('express');
 const request = require('supertest');
 const ObjectId = require('mongoose').Types.ObjectId;
 const { generateToken } = require('../../lib/jwt');
-
 const app = express();
 
 app.use(express.json());
@@ -11,8 +10,10 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use('/conversations', conversationRouter);
 
+let mockUserId = new ObjectId().toString();
+
 const mockToken = generateToken({
-  id: '123',
+  id: mockUserId,
   role: 'admin',
   username: 'karol',
 });
@@ -24,7 +25,7 @@ jest.mock('../../models/conversation', () => ({
   findById: jest.fn().mockImplementation((id) => ({
     populate: jest.fn().mockResolvedValue({
       id,
-      participants: ['user1', 'user2'],
+      participants: [mockUserId, 'user2'],
       messages: [
         { _id: 'msg1', text: 'Hello!', createdAt: new Date() },
         { _id: 'msg2', text: 'Hi there!', createdAt: new Date() },
@@ -54,13 +55,12 @@ describe('GET /conversations', () => {
 
 describe('POST /conversations', () => {
   test('Should create new conversation between users', async () => {
-    let senderId = new ObjectId().toString();
     let receiverId = new ObjectId().toString();
 
     const response = await request(app)
       .post('/conversations')
       .set('Authorization', `Bearer ${mockToken}`)
-      .send({ senderId: senderId, receiverId: receiverId });
+      .send({ receiverId: receiverId });
 
     expect(response.status).toBe(201);
     expect(response.body.conversation).toBeInstanceOf(Object);
@@ -69,24 +69,23 @@ describe('POST /conversations', () => {
   });
 
   test('Should throw 400 if both ids are identical', async () => {
-    let senderId = new ObjectId().toString();
-    let receiverId = senderId;
+    let receiverId = mockUserId;
 
     const response = await request(app)
       .post('/conversations')
       .set('Authorization', `Bearer ${mockToken}`)
-      .send({ senderId: senderId, receiverId: receiverId });
+      .send({ receiverId: receiverId });
 
     expect(response.status).toBe(400);
     expect(response.body.errors[0].msg).toMatch(
-      /Sender and receiver cannot be the same./i
+      /Sender and receiver cannot have same ID./i
     );
   });
 });
 
 describe('GET /conversations/:id', () => {
   test('Should get conversation details', async () => {
-    let id = new ObjectId().toString();
+    let id = mockUserId;
     const response = await request(app)
       .get(`/conversations/${id}`)
       .set('authorization', `Bearer ${mockToken}`);
