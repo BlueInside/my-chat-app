@@ -4,15 +4,22 @@ const {
   createUserValidationRules,
   updateUserValidationRules,
   validate,
+  getAllUsersValidation,
+  getUserByIdValidation,
 } = require('../lib/userValidations');
 const { authenticateToken } = require('../lib/jwt');
 const userController = require('../controllers/usersController');
 
 // GET all users
-router.get('/', userController.getAllUsers);
+router.get('/', getAllUsersValidation(), userController.getAllUsers);
 
 // GET single user
-router.get('/:id', authenticateToken, userController.getUserById);
+router.get(
+  '/:id',
+  authenticateToken,
+  getUserByIdValidation(),
+  userController.getUserById
+);
 
 // POST new user
 router.post(
