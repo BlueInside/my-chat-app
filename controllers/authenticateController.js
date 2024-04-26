@@ -1,11 +1,10 @@
 const User = require('../models/user');
 const asyncHandler = require('express-async-handler');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-
 require('dotenv').config();
+const { generateToken } = require('../lib/jwt');
 
-const sign_up = asyncHandler(async (req, res, next) => {
+const signUp = asyncHandler(async (req, res, next) => {
   const { username, password } = req.body;
 
   try {
@@ -24,12 +23,10 @@ const sign_up = asyncHandler(async (req, res, next) => {
     }
 
     // Generate token
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: '2h',
-    });
+    const token = generateToken(newUser);
 
-    res.status(201).json({
-      user: newUser,
+    return res.status(201).json({
+      user: { username: newUser.username },
       token: token,
     });
   } catch (error) {
@@ -47,12 +44,11 @@ const login = asyncHandler(async (req, res, next) => {
 
     const match = await bcrypt.compare(password, user.password);
     // Checks if password match hashed password value.
-    if (!match) res.status(401).json({ message: `Password doesn't match.` });
-
+    if (!match) {
+      return res.status(401).json({ message: `Password doesn't match.` });
+    }
     // Generate token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '2h',
-    });
+    const token = generateToken(user);
 
     // Login user
     res
@@ -64,6 +60,6 @@ const login = asyncHandler(async (req, res, next) => {
 });
 
 module.exports = {
-  sign_up,
+  signUp,
   login,
 };
