@@ -99,6 +99,8 @@ describe('POST /users', () => {
   test('Should create new user, and return it', async () => {
     const response = await request(app)
       .post('/users')
+      .set('Authorization', `Bearer ${mockToken}`)
+
       .send({ username: 'newUser', password: 'password12345' });
 
     expect(response.status).toBe(201);
