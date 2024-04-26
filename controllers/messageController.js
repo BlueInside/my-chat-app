@@ -8,7 +8,13 @@ const conversation = require('../models/conversation');
 
 const getAllMessages = asyncHandler(async (req, res, next) => {
   const messages = await Message.find({});
-  if (!messages) res.status(404).json({ message: 'Messages not found' });
+
+  // 404 if no messages found
+  if (!messages) {
+    return res.status(404).json({ message: 'Messages not found' });
+  }
+
+  // return messages
   res.status(200).json({ messages: messages });
 });
 
@@ -63,19 +69,19 @@ const sendMessage = asyncHandler(async (req, res, next) => {
 
 const deleteMessage = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const isValidId = mongoose.Types.ObjectId.isValid(id);
-  if (!isValidId) {
-    return res.status(400).json({ message: 'Invalid id.' });
-  }
 
+  // Delete message and return it
   const deletedMessage = await Message.findByIdAndDelete(id);
 
+  //  If no message was deleted
   if (!deletedMessage) {
     return res.status(404).json({ message: 'Message not found.' });
   }
 
+  // Delete message from conversation model
   await Conversation.updateMany({ messages: id }, { $pull: { messages: id } });
 
+  // Return response with deleted message
   res.status(200).json({
     message: `Message ${id} successfully deleted.`,
     data: deletedMessage,
