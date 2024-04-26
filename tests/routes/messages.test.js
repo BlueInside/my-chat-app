@@ -2,6 +2,7 @@ const express = require('express');
 const request = require('supertest');
 const messages = require('../../routes/messages');
 const ObjectId = require('mongoose').Types.ObjectId;
+
 const { generateToken } = require('../../lib/jwt');
 
 const app = express();
@@ -61,7 +62,6 @@ describe('POST /messages', () => {
   test('Should send message', async () => {
     const data = {
       receiverId: new ObjectId().toString(),
-      senderId: new ObjectId().toString(),
       text: 'Hello world',
     };
 
@@ -73,7 +73,7 @@ describe('POST /messages', () => {
     expect(response.status).toBe(201);
     expect(response.body.data.text).toBe(data.text);
     expect(response.body.data.receiver).toBe(data.receiverId);
-    expect(response.body.data.sender).toBe(data.senderId);
+    expect(response.body.data.sender).toBe(mockId);
   });
 });
 
