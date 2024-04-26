@@ -79,4 +79,12 @@ describe('DELETE /messages/:id', () => {
     expect(response.body.message).toMatch(`Message ${id} successfully deleted`);
     expect(response.body.data).toBeInstanceOf(Object);
   });
+
+  test('Should throw 400 if id is in wrong format', async () => {
+    const id = 'wrong format id';
+    const response = await request(app).delete(`/messages/${id}`);
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors[0].msg).toMatch(`Invalid id format.`);
+  });
 });
