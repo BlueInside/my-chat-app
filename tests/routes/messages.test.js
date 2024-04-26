@@ -2,12 +2,21 @@ const express = require('express');
 const request = require('supertest');
 const messages = require('../../routes/messages');
 const ObjectId = require('mongoose').Types.ObjectId;
+const { generateToken } = require('../../lib/jwt');
+
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use('/messages', messages);
+
+let mockId = new ObjectId().toString();
+const mockToken = generateToken({
+  id: mockId,
+  username: 'karol',
+  role: 'admin',
+});
 
 // Mock conversation model
 jest.mock('../../models/conversation', () => ({
@@ -38,7 +47,9 @@ jest.mock('../../models/message', () => ({
 describe('GET /messages', () => {
   test('Get single message by id', async () => {
     const id = new ObjectId();
-    const response = await request(app).get(`/messages/${id}`);
+    const response = await request(app)
+      .get(`/messages/${id}`)
+      .set('authorization', `Bearer ${mockToken}`);
 
     expect(response.status).toBe(200);
     expect(response.body.message).toBeInstanceOf(Object);
@@ -54,7 +65,10 @@ describe('POST /messages', () => {
       text: 'Hello world',
     };
 
-    const response = await request(app).post('/messages').send(data);
+    const response = await request(app)
+      .post('/messages')
+      .send(data)
+      .set('authorization', `Bearer ${mockToken}`);
 
     expect(response.status).toBe(201);
     expect(response.body.data.text).toBe(data.text);
@@ -66,7 +80,9 @@ describe('POST /messages', () => {
 describe('DELETE /messages/:id', () => {
   test('Should delete message by id', async () => {
     const id = new ObjectId().toString();
-    const response = await request(app).delete(`/messages/${id}`);
+    const response = await request(app)
+      .delete(`/messages/${id}`)
+      .set('authorization', `Bearer ${mockToken}`);
 
     expect(response.status).toBe(200);
     expect(response.body.message).toMatch(`Message ${id} successfully deleted`);
@@ -75,7 +91,9 @@ describe('DELETE /messages/:id', () => {
 
   test('Should throw 400 if id is in wrong format', async () => {
     const id = 'wrong format id';
-    const response = await request(app).delete(`/messages/${id}`);
+    const response = await request(app)
+      .delete(`/messages/${id}`)
+      .set('authorization', `Bearer ${mockToken}`);
 
     expect(response.status).toBe(400);
     expect(response.body.errors[0].msg).toMatch(`Invalid id format.`);
