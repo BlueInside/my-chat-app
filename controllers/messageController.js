@@ -6,18 +6,6 @@ const mongoose = require('mongoose');
 const asyncHandler = require('express-async-handler');
 const conversation = require('../models/conversation');
 
-const getAllMessages = asyncHandler(async (req, res, next) => {
-  const messages = await Message.find({});
-
-  // 404 if no messages found
-  if (!messages) {
-    return res.status(404).json({ message: 'Messages not found' });
-  }
-
-  // return messages
-  res.status(200).json({ messages: messages });
-});
-
 const getMessageById = asyncHandler(async (req, res, next) => {
   const message = await Message.findById(req.params.id);
 
@@ -88,4 +76,4 @@ const deleteMessage = asyncHandler(async (req, res, next) => {
   });
 });
 
-module.exports = { getAllMessages, getMessageById, sendMessage, deleteMessage };
+module.exports = { getMessageById, sendMessage, deleteMessage };
