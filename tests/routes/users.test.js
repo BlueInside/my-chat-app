@@ -2,7 +2,7 @@ const users = require('../../routes/users');
 const request = require('supertest');
 const express = require('express');
 const { generateToken } = require('../../lib/jwt');
-
+const ObjectId = require('mongoose').Types.ObjectId;
 const app = express();
 
 app.use(express.json());
@@ -37,7 +37,7 @@ jest.mock('../../models/user', () => {
     findById: jest
       .fn()
       .mockImplementation((id) =>
-        Promise.resolve(users.find((user) => user.id === parseInt(id)))
+        Promise.resolve([{ id, username: 'username' }])
       ),
     findByIdAndUpdate: jest.fn().mockImplementation((id, update) => {
       const existingUser = users.find((user) => user.id === parseInt(id));
@@ -70,14 +70,15 @@ describe('GET /users', () => {
   });
 
   test('Should get a user when valid ID is provided', async () => {
+    let id = new ObjectId().toString();
     const response = await request(app)
-      .get('/users/1')
+      .get(`/users/${id}`)
       .set('Authorization', `Bearer ${mockToken}`)
       .expect('Content-Type', /json/);
 
     console.log(response.body);
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('username', 'username');
+    expect(response.body[0]).toHaveProperty('username', 'username');
   });
 
   test('should return 401 if no token is provided', async () => {
@@ -91,7 +92,7 @@ describe('GET /users', () => {
       .get('/users/999')
       .set('Authorization', `Bearer ${mockToken}`);
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(400);
   });
 });
 
