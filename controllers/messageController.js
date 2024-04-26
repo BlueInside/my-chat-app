@@ -13,27 +13,26 @@ const getMessageById = asyncHandler(async (req, res, next) => {
 });
 
 const sendMessage = asyncHandler(async (req, res, next) => {
-  // and sanitization
-  const { receiverId, senderId } = req.body;
+  const { receiverId } = req.body;
 
   // Create message
   const message = await Message.create({
     receiver: receiverId,
-    sender: senderId,
+    sender: req.user.id,
     text: req.body.text,
     type: req.body.type || 'text',
   });
 
   // Create conversation
   const conversation = await Conversation.findOne({
-    participants: { $all: [receiverId, senderId] },
+    participants: { $all: [receiverId, req.user.id] },
   });
 
   //  No conversation, create new
   if (!conversation) {
     const newConversation = await Conversation.create({
       lastMessage: message.id,
-      participants: [receiverId, senderId],
+      participants: [receiverId, req.user.id],
       messages: [message.id],
     });
 
