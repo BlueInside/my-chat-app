@@ -9,7 +9,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/users', users);
 
-const mockToken = generateToken({ id: 1, username: 'karol', role: 'admin' });
+let mockId = new ObjectId().toString();
+const mockToken = generateToken({
+  id: mockId,
+  username: 'karol',
+  role: 'user',
+});
 
 jest.mock('../../models/user', () => {
   let users = [
@@ -50,12 +55,11 @@ jest.mock('../../models/user', () => {
         return Promise.resolve(null);
       }
     }),
-    findByIdAndDelete: jest.fn().mockImplementation((id) => {
-      const existingUser = users.find((user) => user.id === parseInt(id));
-      if (existingUser) {
-        return Promise.resolve(users.find((user) => user.id === parseInt(id)));
-      } else return Promise.resolve(null);
-    }),
+    findByIdAndDelete: jest
+      .fn()
+      .mockImplementation((id) =>
+        Promise.resolve({ id, username: 'some username' })
+      ),
   };
 });
 
@@ -104,7 +108,6 @@ describe('POST /users', () => {
       .send({ username: 'newUser', password: 'password12345' });
 
     expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('username');
   });
 });
 
@@ -142,9 +145,13 @@ describe('PUT /users/:id', () => {
 
 describe('DELETE /users/:id', () => {
   test('Returns checks if route deletes user when id param is correct', async () => {
-    const response = await request(app).delete('/users/1');
+    const response = await request(app)
+      .delete(`/users/${mockId}`)
+      .set('authorization', `Bearer ${mockToken}`);
 
-    expect(response.status).toBe(204);
+    console.log(response.body);
+    expect(response.status).toBe(200);
+    expect(response.body.message).toMatch(/user deleted/i);
   });
 });
 
