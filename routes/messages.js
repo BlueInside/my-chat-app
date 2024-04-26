@@ -19,8 +19,8 @@ messages.get(
 // Send new message with POST
 messages.post(
   '/',
-  createMessageValidation(),
   authenticateToken,
+  createMessageValidation(),
   messageController.sendMessage
 );
 
