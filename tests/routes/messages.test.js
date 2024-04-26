@@ -16,7 +16,7 @@ let mockId = new ObjectId().toString();
 const mockToken = generateToken({
   id: mockId,
   username: 'karol',
-  role: 'admin',
+  role: 'user',
 });
 
 // Mock conversation model
@@ -33,7 +33,15 @@ jest.mock('../../models/conversation', () => ({
 // Mock messages model
 jest.mock('../../models/message', () => ({
   find: jest.fn().mockResolvedValue([]),
-  findById: jest.fn().mockResolvedValue({ id: '1', text: 'Hello World' }),
+  findById: jest.fn().mockImplementation((id) =>
+    Promise.resolve({
+      id,
+      sender: {
+        toString: () => id,
+      },
+      text: 'Hello World',
+    })
+  ),
   create: jest.fn().mockImplementation((data) =>
     Promise.resolve({
       id: data.sender,
@@ -79,13 +87,14 @@ describe('POST /messages', () => {
 
 describe('DELETE /messages/:id', () => {
   test('Should delete message by id', async () => {
-    const id = new ObjectId().toString();
     const response = await request(app)
-      .delete(`/messages/${id}`)
+      .delete(`/messages/${mockId}`)
       .set('authorization', `Bearer ${mockToken}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.message).toMatch(`Message ${id} successfully deleted`);
+    expect(response.body.message).toMatch(
+      `Message ${mockId} successfully deleted`
+    );
     expect(response.body.data).toBeInstanceOf(Object);
   });
 
