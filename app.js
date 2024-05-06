@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-
+const cors = require('cors');
 // Connect to the database
 require('./config/db');
 
@@ -15,6 +15,11 @@ const conversationsRouter = require('./routes/conversation');
 const authenticateRouter = require('./routes/authenticate');
 const app = express();
 
+const corsOptions = {
+  origin: 'http://localhost:5173',
+};
+
+app.use(cors(corsOptions));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
