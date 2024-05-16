@@ -21,17 +21,36 @@ const mockToken = generateToken({
 // mock Conversation model;
 const Conversation = require('../../models/conversation');
 jest.mock('../../models/conversation', () => ({
-  find: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
-  findById: jest.fn().mockImplementation((id) => ({
-    populate: jest.fn().mockResolvedValue({
-      id,
-      participants: [mockUserId, 'user2'],
-      messages: [
-        { _id: 'msg1', text: 'Hello!', createdAt: new Date() },
-        { _id: 'msg2', text: 'Hi there!', createdAt: new Date() },
-      ],
-    }),
+  find: jest.fn(() => ({
+    populate: jest.fn(() => ({
+      populate: jest.fn().mockResolvedValue([
+        {
+          id: 1,
+          participants: [{ username: 'user1', avatarUrl: 'url1' }],
+          lastMessage: { content: 'Hello!', createdAt: new Date() },
+        },
+        {
+          id: 2,
+          participants: [{ username: 'user2', avatarUrl: 'url2' }],
+          lastMessage: { content: 'Hi there!', createdAt: new Date() },
+        },
+      ]),
+    })),
   })),
+
+  findById: jest.fn().mockImplementation((id) => ({
+    populate: jest.fn(() => ({
+      populate: jest.fn().mockResolvedValue({
+        id,
+        participants: [{ _id: mockUserId, username: 'user1' }],
+        messages: [
+          { _id: 'msg1', text: 'Hello!', createdAt: new Date() },
+          { _id: 'msg2', text: 'Hi there!', createdAt: new Date() },
+        ],
+      }),
+    })),
+  })),
+
   create: jest.fn().mockImplementation((data) => {
     return Promise.resolve({
       id: data.senderId,
@@ -47,7 +66,6 @@ describe('GET /conversations', () => {
     const response = await request(app)
       .get('/conversations')
       .set('Authorization', `Bearer ${mockToken}`);
-
     expect(response.status).toBe(200);
     expect(response.body.conversations).toHaveLength(2);
   });
