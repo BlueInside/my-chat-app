@@ -4,7 +4,11 @@ const asyncHandler = require('express-async-handler');
 const getAllConversations = asyncHandler(async (req, res) => {
   // Use jwt payload to get userId
   const userId = req.user.id;
-  const conversations = await Conversation.find({ participants: userId });
+  const conversations = await Conversation.find({
+    participants: userId,
+  })
+    .populate('participants', 'username avatarUrl')
+    .populate('lastMessage', 'text');
 
   res.status(200).json({ conversations: conversations });
 });
@@ -28,7 +32,7 @@ const createConversation = asyncHandler(async (req, res) => {
   } catch (error) {
     if (error.code === 11000) {
       // MongoDB duplicate key error
-      res.status(409).json({ message: 'Conversation already exists.' });
+      return res.status(409).json({ message: 'Conversation already exists.' });
     } else {
       return next(error);
     }
@@ -37,18 +41,20 @@ const createConversation = asyncHandler(async (req, res) => {
 
 const getConversationDetails = asyncHandler(async (req, res) => {
   const { id } = req.params;
-
-  const conversation = await Conversation.findById(id).populate({
-    path: 'messages',
-    options: { limit: 25, sort: { createdAt: -1 } },
-  });
+  const senderId = req.user.id;
+  const conversation = await Conversation.findById(id)
+    .populate({
+      path: 'messages',
+      options: { limit: 25, sort: { createdAt: -1 } },
+    })
+    .populate({ path: 'participants', select: 'username avatarUrl' });
 
   if (!conversation) {
     return res.status(404).json({ message: 'Conversation not found.' });
   }
 
   // Verify that user is part of the conversation
-  if (!conversation.participants.includes(req.user.id)) {
+  if (!conversation.participants.some((u) => u._id.toString() === senderId)) {
     return res
       .status(403)
       .json({ message: 'User not authorized to view these messages' });
