@@ -5,7 +5,7 @@ const conversationSchema = new Schema(
   {
     lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' }, // References the latest sent message
     participants: [
-      { type: Schema.Types.ObjectId, ref: 'User', required: true },
+      { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     ],
     messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
   },
@@ -30,6 +30,7 @@ conversationSchema.pre('save', function (next) {
   // Sort participants so it's always in order A B
   if (this.participants) {
     this.participants.sort();
+    next();
   }
 });
 
