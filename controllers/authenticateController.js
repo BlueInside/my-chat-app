@@ -40,7 +40,9 @@ const login = asyncHandler(async (req, res, next) => {
   try {
     const user = await User.findOne({ username });
     // Checks if user was found
-    if (!user) res.status(404).json({ message: 'User not found.' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
 
     const match = await bcrypt.compare(password, user.password);
     // Checks if password match hashed password value.
@@ -59,7 +61,19 @@ const login = asyncHandler(async (req, res, next) => {
   }
 });
 
+const verifyToken = asyncHandler(async (req, res, next) => {
+  if (req.user) {
+    const user = req.user;
+    return res.status(200).json({
+      user: { id: user.id, username: user.username, role: user.role },
+    });
+  } else {
+    return res.status(404).json({ message: 'No user find' });
+  }
+});
+
 module.exports = {
   signUp,
   login,
+  verifyToken,
 };
