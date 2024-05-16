@@ -26,15 +26,17 @@ jest.mock('../../models/user', () => {
     { id: 3, username: 'karol' },
   ];
   return {
-    find: jest.fn((query = {}) => {
+    find: jest.fn().mockImplementation((query = {}) => {
+      let filteredUsers = users;
+
       if (query.username && query.username.$regex) {
         const regex = new RegExp(query.username.$regex, 'i'); // Ignore capitalization
-        return Promise.resolve(
-          users.filter((user) => regex.test(user.username))
-        );
+        filteredUsers = users.filter((user) => regex.test(user.username));
       }
-      return Promise.resolve(users);
+
+      return { sort: jest.fn().mockImplementation(() => filteredUsers) };
     }),
+
     create: jest.fn().mockResolvedValue({
       id: 1,
       username: 'newUser',
@@ -126,7 +128,6 @@ describe('PUT /users/:id', () => {
         role: 'admin',
       });
 
-    if (response.status !== 200) console.log(response.body);
     expect(response.status).toBe(200);
     expect(response.body.user).toHaveProperty('username', 'updatedUsername');
   });
@@ -149,16 +150,15 @@ describe('DELETE /users/:id', () => {
       .delete(`/users/${mockId}`)
       .set('authorization', `Bearer ${mockToken}`);
 
-    console.log(response.body);
     expect(response.status).toBe(200);
     expect(response.body.message).toMatch(/user deleted/i);
   });
 });
 
-describe('GET /users?search=keyword', () => {
+describe('GET /users?q=keyword', () => {
   test('Should find user based on search query', async () => {
     const query = 'karol';
-    const response = await request(app).get('/users').query({ search: query });
+    const response = await request(app).get('/users').query({ q: query });
 
     expect(response.status).toBe(200);
     expect(response.body.users).toBeInstanceOf(Array);
