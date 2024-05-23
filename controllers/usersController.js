@@ -35,6 +35,14 @@ const createUser = asyncHandler(async (req, res, next) => {
 });
 
 const updateUser = asyncHandler(async (req, res, next) => {
+  const userId = req.params.id;
+  const currentUserId = req.user.id;
+  const isAdmin = req.user.role === 'admin';
+
+  if (currentUserId !== userId && !isAdmin) {
+    return res.status(403).json({ message: 'permission denied.' });
+  }
+
   const user = await User.findById(req.params.id);
   if (!user) {
     return res.status(404).json({ message: 'User not found.' });
