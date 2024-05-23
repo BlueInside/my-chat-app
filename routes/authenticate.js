@@ -7,6 +7,7 @@ const {
   verifyToken,
 } = require('../controllers/authenticateController');
 const { authenticateToken } = require('../lib/jwt.js');
+
 // POST register
 authenticate.post('/register', registerValidation(), signUp);
 
