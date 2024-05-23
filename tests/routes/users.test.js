@@ -2,6 +2,7 @@ const users = require('../../routes/users');
 const request = require('supertest');
 const express = require('express');
 const { generateToken } = require('../../lib/jwt');
+const { listeners } = require('../../models/user');
 const ObjectId = require('mongoose').Types.ObjectId;
 const app = express();
 
@@ -10,10 +11,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/users', users);
 
 let mockId = new ObjectId().toString();
+
 const mockToken = generateToken({
   id: mockId,
   username: 'karol',
-  role: 'user',
+  role: 'admin',
 });
 
 jest.mock('../../models/user', () => {
@@ -116,7 +118,7 @@ describe('POST /users', () => {
 describe('PUT /users/:id', () => {
   test('Should update existing user and return it', async () => {
     const response = await request(app)
-      .put('/users/2')
+      .put(`/users/2`)
       .set('Authorization', `Bearer ${mockToken}`)
       .send({
         username: 'updatedUsername',
@@ -127,7 +129,6 @@ describe('PUT /users/:id', () => {
         dateOfBirth: '1997-05-18',
         role: 'admin',
       });
-
     expect(response.status).toBe(200);
     expect(response.body.user).toHaveProperty('username', 'updatedUsername');
   });
