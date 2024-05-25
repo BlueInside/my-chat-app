@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const asyncHandler = require('express-async-handler');
 // Get all users
+
 const getAllUsers = asyncHandler(async (req, res) => {
   const searchQuery = req.query.q;
   if (!searchQuery) {
@@ -56,9 +57,11 @@ const updateUser = asyncHandler(async (req, res, next) => {
     return res.status(400).json({ message: 'Error updating user.' });
   }
 
-  return res
-    .status(200)
-    .json({ message: 'User updated successfully.', user: updatedUser });
+  return res.status(200).json({
+    message: 'User updated successfully.',
+    user: updatedUser,
+    fileDetails: req.file,
+  });
 });
 
 const deleteUser = asyncHandler(async (req, res, next) => {
