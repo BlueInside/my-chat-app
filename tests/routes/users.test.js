@@ -2,9 +2,11 @@ const users = require('../../routes/users');
 const request = require('supertest');
 const express = require('express');
 const { generateToken } = require('../../lib/jwt');
-const { listeners } = require('../../models/user');
 const ObjectId = require('mongoose').Types.ObjectId;
 const app = express();
+
+const fs = require('fs');
+const path = require('path');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -165,5 +167,23 @@ describe('GET /users?q=keyword', () => {
     expect(response.body.users).toBeInstanceOf(Array);
     expect(response.body.users).toHaveLength(1);
     expect(response.body.users[0].username).toBe('karol');
+  });
+});
+
+describe('PUT /users/:id with file upload', () => {
+  test('Should upload a file and return file details', async () => {
+    const imagePath = path.join(__dirname, 'test.jpg');
+    const response = await request(app)
+      .put(`/users/${2}`) // Using the mockId you've defined earlier
+      .set('Authorization', `Bearer ${mockToken}`) // Assuming the route requires authentication
+      .attach('avatar', imagePath) // Simulating file upload
+      .field('username', 'updatedUsername')
+      .field('fullName', 'Karol Pulawski')
+      .field('role', 'admin');
+
+    expect(response.status).toBe(200);
+    expect(response.body.fileDetails).toBeDefined();
+    expect(response.body.fileDetails.originalname).toEqual('test.jpg');
+    expect(response.body.user).toHaveProperty('username', 'updatedUsername');
   });
 });
