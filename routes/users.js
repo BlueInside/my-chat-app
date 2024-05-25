@@ -10,7 +10,7 @@ const {
 } = require('../lib/userValidations');
 const { authenticateToken } = require('../lib/jwt');
 const userController = require('../controllers/usersController');
-
+const { upload } = require('../lib/multer');
 // GET all users
 router.get('/', getAllUsersValidation(), userController.getAllUsers);
 
@@ -35,6 +35,7 @@ router.post(
 router.put(
   '/:id',
   authenticateToken,
+  upload.single('avatar'),
   updateUserValidationRules(),
   validate,
   userController.updateUser
