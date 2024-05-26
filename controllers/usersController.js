@@ -1,5 +1,7 @@
 const User = require('../models/user');
 const asyncHandler = require('express-async-handler');
+require('dotenv').config();
+
 // Get all users
 
 const getAllUsers = asyncHandler(async (req, res) => {
