@@ -1,5 +1,9 @@
 const User = require('../models/user');
 const asyncHandler = require('express-async-handler');
+const stream = require('node:stream');
+require('dotenv').config();
+const cloudinary = require('cloudinary').v2;
+
 // Get all users
 
 const getAllUsers = asyncHandler(async (req, res) => {
@@ -31,7 +35,6 @@ const createUser = asyncHandler(async (req, res, next) => {
   // Validation !
   const newUser = await User.create(req.body);
   if (!newUser) res.status(400).json({ message: 'Error creating new user.' });
-
   res.status(201).json(newUser);
 });
 
@@ -49,7 +52,37 @@ const updateUser = asyncHandler(async (req, res, next) => {
     return res.status(404).json({ message: 'User not found.' });
   }
 
-  const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+  let cloudinaryResult = null;
+
+  if (req.file && req.file.buffer) {
+    try {
+      cloudinaryResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: 'image',
+            folder: 'my-chat-app-avatars',
+            allowed_formats: ['jpg', 'png', 'gif', 'webp'],
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        const bufferStream = new stream.PassThrough();
+        bufferStream.end(req.file.buffer);
+        bufferStream.pipe(uploadStream);
+      });
+    } catch (error) {
+      console.error('cloudinary error:', error);
+      return res.status(500).json({ message: 'Failed to upload image' });
+    }
+  }
+
+  const updatedData = cloudinaryResult?.url
+    ? { ...req.body, avatarUrl: cloudinaryResult.url }
+    : { ...req.body };
+
+  const updatedUser = await User.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   });
 
@@ -60,7 +93,6 @@ const updateUser = asyncHandler(async (req, res, next) => {
   return res.status(200).json({
     message: 'User updated successfully.',
     user: updatedUser,
-    fileDetails: req.file,
   });
 });
 
