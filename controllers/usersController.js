@@ -78,9 +78,13 @@ const updateUser = asyncHandler(async (req, res, next) => {
     }
   }
 
+  // Fields that can be edited
+  const { fullName, bio, dateOfBirth } = req.body;
+  const data = { fullName, bio, dateOfBirth };
+
   const updatedData = cloudinaryResult?.url
-    ? { ...req.body, avatarUrl: cloudinaryResult.url }
-    : { ...req.body };
+    ? { ...data, avatarUrl: cloudinaryResult.url }
+    : { ...data };
 
   const updatedUser = await User.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
