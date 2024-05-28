@@ -6,6 +6,7 @@ const logger = require('morgan');
 const cors = require('cors');
 const compression = require('compression');
 const helmet = require('helmet');
+const RateLimit = require('express-rate-limit');
 
 // Connect to the database
 require('./config/db');
@@ -18,10 +19,16 @@ const conversationsRouter = require('./routes/conversation');
 const authenticateRouter = require('./routes/authenticate');
 const app = express();
 
+const limiter = RateLimit.rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 30,
+});
+
 const corsOptions = {
   origin: 'http://localhost:5173',
 };
 
+app.use(limiter);
 app.use(compression());
 app.use(helmet());
 app.use(cors(corsOptions));
