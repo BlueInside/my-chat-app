@@ -25,7 +25,7 @@ const limiter = RateLimit.rateLimit({
 });
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: 'https://bluinside-my-chat.netlify.app',
 };
 
 app.use(limiter);
