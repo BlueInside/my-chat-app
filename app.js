@@ -19,6 +19,8 @@ const conversationsRouter = require('./routes/conversation');
 const authenticateRouter = require('./routes/authenticate');
 const app = express();
 
+app.set('trust proxy', 1);
+
 const limiter = RateLimit.rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 30,
