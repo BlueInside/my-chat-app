@@ -5,6 +5,8 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
 const compression = require('compression');
+const helmet = require('helmet');
+
 // Connect to the database
 require('./config/db');
 
@@ -21,6 +23,7 @@ const corsOptions = {
 };
 
 app.use(compression());
+app.use(helmet());
 app.use(cors(corsOptions));
 app.use(logger('dev'));
 app.use(express.json());
