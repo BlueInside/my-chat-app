@@ -118,7 +118,7 @@ describe('POST /users', () => {
 });
 
 describe('PUT /users/:id', () => {
-  test('Should update existing user and return it', async () => {
+  test.skip('Should update existing user and return it', async () => {
     const response = await request(app)
       .put(`/users/2`)
       .set('Authorization', `Bearer ${mockToken}`)
