@@ -28,6 +28,35 @@ Through this project, I aim to learn and apply the following concepts:
 - Scalable folder structure for easy management and expansion.
 - Image upload capability for messages (planned for future development).
 
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+- Node.js (Download [here](https://nodejs.org/en/download/))
+- npm (Node Package Manager, comes with Node.js installation)
+
+## Installation
+
+Follow these steps to get your development environment running:
+
+1. **Clone the repository**
+   ```bash
+   git clone [git@github.com:BlueInside/my-chat-app.git]
+   cd my-chat-app
+   ```
+2. **Install dependencies**
+```bash
+npm install
+```
+
+## Running the application
+1. **Start the application**
+```bash
+npm run dev
+```
+
+2. **Start the application**
+   Open your web browser and navigate to http://localhost:3000 to view the app. Enjoy chatting.
+   
 ## Contributions
 
 While this project is primarily for educational purposes, contributions and suggestions are welcome. Feel free to fork this repository and submit pull requests with your improvements.
