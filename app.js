@@ -22,8 +22,8 @@ const app = express();
 app.set('trust proxy', 1);
 
 const limiter = RateLimit.rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 30,
+  windowMs: 2 * 60 * 1000,
+  max: 50,
 });
 
 const corsOptions = {
@@ -31,9 +31,9 @@ const corsOptions = {
 };
 
 app.use(limiter);
-app.use(compression());
-app.use(helmet());
 app.use(cors(corsOptions));
+app.use(helmet());
+app.use(compression());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
